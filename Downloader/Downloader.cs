@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Net;
+using System.Threading;
 
 namespace Downloader
 {
@@ -107,6 +108,32 @@ namespace Downloader
                 saveFileStream.Write(downBuffer, 0, iByteSize);
             }
 
+        }
+
+        public void DownloadFileInThread(string fileUrl)
+        {
+            List<FileDownloader> fileDownloadersList = new List<FileDownloader>();
+            WebRequest webRequest = HttpWebRequest.Create(fileUrl);
+            webRequest.Method = "HEAD";
+            WebResponse webResponse = webRequest.GetResponse();
+            int responseLength = int.Parse(webResponse.Headers.Get("Content-Length"));
+            for (int i = 0; i < responseLength; i = i + 1024)
+            {
+                fileDownloadersList.Add(new FileDownloader(fileUrl, i, (i + 1024)));
+            }
+
+            List<Thread> threadList = new List<Thread>();
+            foreach (var filePart in fileDownloadersList)
+            {
+                Thread thread = new Thread(filePart.DoDownload);
+                threadList.Add(thread);
+                thread.Start();
+            }
+
+            foreach (var thread in threadList)
+            {
+                thread.Join();
+            }
         }
 
 
