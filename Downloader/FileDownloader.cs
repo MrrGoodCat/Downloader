@@ -34,14 +34,14 @@ namespace Downloader
             this.start = start;
             this.count = count;
             PathTemp = Path.GetTempFileName();
-            fileStream = new FileStream(PathTemp, FileMode.Append, FileAccess.ReadWrite);
+            fileStream = new FileStream(PathTemp, FileMode.OpenOrCreate, FileAccess.ReadWrite);
         }
 
-        public void DoDownload(HttpWebRequest request)
+        public void DoDownload()
         {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.AddRange(start, count);
-
-            WebResponse response = request.GetResponse();
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
             Stream responseStream = response.GetResponseStream();
 
@@ -52,7 +52,8 @@ namespace Downloader
             {
                 //to do
                 writeFile(buffer, (int)(totalBytes + start), x);
-                x = responseStream.Read(buffer, 0, 256);
+                x--;
+                //x = responseStream.Read(buffer, 0, 256);
             }
             responseStream.Close();
         }
@@ -62,7 +63,7 @@ namespace Downloader
             lock (fileStream)
             {
                 fileStream.Seek(start, SeekOrigin.Begin);
-                fileStream.Write(buffer, 0, count);
+                fileStream.Write(buffer, start, count);
                 return;
             }
         }

@@ -113,13 +113,13 @@ namespace Downloader
         public void DownloadFileInThread(string fileUrl)
         {
             List<FileDownloader> fileDownloadersList = new List<FileDownloader>();
-            WebRequest webRequest = HttpWebRequest.Create(fileUrl);
+            HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(fileUrl);
             webRequest.Method = "HEAD";
-            WebResponse webResponse = webRequest.GetResponse();
+            HttpWebResponse webResponse = (HttpWebResponse)webRequest.GetResponse();
             int responseLength = int.Parse(webResponse.Headers.Get("Content-Length"));
-            for (int i = 0; i < responseLength; i = i + 1024)
+            for (int i = 0; i < responseLength; i = i + 1024000)
             {
-                fileDownloadersList.Add(new FileDownloader(fileUrl, i, (i + 1024)));
+                fileDownloadersList.Add(new FileDownloader(fileUrl, i, (i + 1024000)));
             }
 
             List<Thread> threadList = new List<Thread>();
