@@ -34,12 +34,15 @@ namespace Downloader
             this.start = start;
             this.count = count;
             PathTemp = Path.GetTempFileName();
-            fileStream = new FileStream(PathTemp, FileMode.Append);
+            fileStream = new FileStream(PathTemp, FileMode.Append, FileAccess.ReadWrite);
         }
 
-        public void DoDownload(HttpWebRequest request, HttpWebResponse response)
+        public void DoDownload(HttpWebRequest request)
         {
             request.AddRange(start, count);
+
+            WebResponse response = request.GetResponse();
+
             Stream responseStream = response.GetResponseStream();
 
             int totalBytes = 0; // use this value
@@ -48,6 +51,7 @@ namespace Downloader
             while (x > 0)
             {
                 //to do
+                writeFile(buffer, (int)(totalBytes + start), x);
                 x = responseStream.Read(buffer, 0, 256);
             }
             responseStream.Close();
