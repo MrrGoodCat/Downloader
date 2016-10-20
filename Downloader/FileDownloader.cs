@@ -16,6 +16,7 @@ namespace Downloader
         string pathTemp;
         string url;
         FileStream fileStream;
+
         static object lockObject = new object();
         public string PathTemp
         {
@@ -42,11 +43,11 @@ namespace Downloader
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.AddRange(start, end);
-            //Task<HttpWebResponse> task = await (HttpWebResponse)request.GetResponseAsync();
+            //Task<HttpWebResponse> task = await (HttpWebResponse)request.GetResponseAsync();           
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-
             Stream responseStream = response.GetResponseStream();
-
+            
+            Downloader.mrs.Set();
             int totalBytes = 0; // use this value
             byte[] buffer = new byte[1024];
             int x = responseStream.Read(buffer, 0, 1024);
@@ -55,16 +56,13 @@ namespace Downloader
             {
                 lock (lockObject)
                 {
-                    
                     writeFile(buffer, (int)(totalBytes + start), x);
                     totalBytes += x;
                     x = responseStream.Read(buffer, 0, 1024);
-
                 }
             }
             Console.WriteLine("Done");
             responseStream.Close();
-
         }
 
         void writeFile(byte[] buffer, int start, int count)
@@ -75,7 +73,6 @@ namespace Downloader
                 fileStream.Write(buffer, 0, count);
                 return;
             }
-
         }
     }
 }

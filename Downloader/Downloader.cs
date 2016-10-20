@@ -9,14 +9,16 @@ using System.Threading;
 
 namespace Downloader
 {
+
     public class Downloader
     {
         //const long DefaultSize = 26214400;
-        //long Chunk = 26214400;
+        int Chunk = 16384;
         //long offset = 0;
         //byte[] bytesInStream;
-        static string MyFilePath = "Downloadtest.gifv";
-
+        static string MyFilePath = "Downloadtest.jpg";
+        //static Semaphore semaphore = new Semaphore(0, 3);
+        static public ManualResetEvent mrs = new ManualResetEvent(false);
 
         //public void Download(string url, string filename)
         //{
@@ -125,25 +127,29 @@ namespace Downloader
             }
             
 
-            for (int i = 0; i < responseLength; i += 1024)
+            for (int i = 0; i < responseLength; i += (Chunk))
             {
-                fileDownloadersList.Add(new FileDownloader(fileUrl, i, (i + 1024), MyFilePath));
+                fileDownloadersList.Add(new FileDownloader(fileUrl, i, (i + (Chunk)), MyFilePath));
             }
 
             List<Thread> threadList = new List<Thread>();
             foreach (var filePart in fileDownloadersList)
             {
+                mrs.Reset();
                 Thread thread = new Thread(filePart.DoDownload);
-                Thread.Sleep(50);
+                //Thread.Sleep(40);
                 threadList.Add(thread);
                 thread.Start();
+                mrs.WaitOne();
                 Console.WriteLine("ok");
+                
             }
 
             foreach (var thread in threadList)
             {
                 //thread.Join();
             }
+
         }
 
 
