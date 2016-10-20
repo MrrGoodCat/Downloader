@@ -117,9 +117,9 @@ namespace Downloader
             webRequest.Method = "HEAD";
             HttpWebResponse webResponse = (HttpWebResponse)webRequest.GetResponse();
             int responseLength = int.Parse(webResponse.Headers.Get("Content-Length"));
-            for (int i = 0; i < responseLength; i = i + 1024000)
+            for (int i = 0; i < responseLength; i = i + 10240)
             {
-                fileDownloadersList.Add(new FileDownloader(fileUrl, i, (i + 1024000)));
+                fileDownloadersList.Add(new FileDownloader(fileUrl, i, (i + 10240)));
             }
 
             List<Thread> threadList = new List<Thread>();

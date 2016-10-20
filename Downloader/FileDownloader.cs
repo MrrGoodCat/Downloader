@@ -52,10 +52,14 @@ namespace Downloader
             {
                 //to do
                 writeFile(buffer, (int)(totalBytes + start), x);
-                x--;
-                //x = responseStream.Read(buffer, 0, 256);
+                //x--;
+                totalBytes += x;
+                x = responseStream.Read(buffer, 0, 256);
+                //Console.WriteLine(x);
+
             }
             responseStream.Close();
+            Console.WriteLine("Done");
         }
 
         void writeFile(byte[] buffer, int start, int count)
@@ -63,7 +67,7 @@ namespace Downloader
             lock (fileStream)
             {
                 fileStream.Seek(start, SeekOrigin.Begin);
-                fileStream.Write(buffer, start, count);
+                fileStream.Write(buffer, 0, count);
                 return;
             }
         }
