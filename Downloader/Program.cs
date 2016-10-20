@@ -14,9 +14,10 @@ namespace Downloader
            // Uri uri = new Uri($"http://imgur.com/gallery/");
             WebClient web = new WebClient();
             Downloader dw = new Downloader();
+            string file2 = $"http://i.imgur.com/7mCTJOA.gifv";
             string file = $"http://images.reseto.com/uploads/d6fe0cd76874145b84db528ae652d4e0.jpg";
             Console.WriteLine("Downloading a file");
-            dw.DownloadFileInThread(file);
+            dw.DownloadFileInThread(file2);
             Console.WriteLine("File has been downloaded");
             Console.ReadLine();
         }
