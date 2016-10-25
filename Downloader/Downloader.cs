@@ -12,13 +12,54 @@ namespace Downloader
 
     public class Downloader
     {
-        //const long DefaultSize = 26214400;
-        int Chunk = 16384;
-        //long offset = 0;
-        //byte[] bytesInStream;
+        object lockObject = new object();
+        int Chunk = 363840;
         static string MyFilePath = "Downloadtest.jpg";
-        //static Semaphore semaphore = new Semaphore(0, 3);
-        static public ManualResetEvent mrs = new ManualResetEvent(false);
+        public static ManualResetEvent manualEvent = new ManualResetEvent(false);
+
+        public void DownloadFileInThread(string fileUrl)
+        {
+            List<FileDownloader> fileDownloadersList = new List<FileDownloader>();
+            HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(fileUrl);
+            webRequest.Method = "HEAD";
+            HttpWebResponse webResponse = (HttpWebResponse)webRequest.GetResponse();
+            int responseLength = int.Parse(webResponse.Headers.Get("Content-Length"));
+            using (FileStream stream = File.Create(MyFilePath))
+            {
+                stream.SetLength(responseLength);
+            }
+            
+
+            for (int i = 0; i < responseLength; i += (Chunk))
+            {
+                fileDownloadersList.Add(new FileDownloader(fileUrl, i, (i + (Chunk)), MyFilePath));
+            }
+
+            List<Thread> threadList = new List<Thread>();
+            int k = 0;
+            foreach (var filePart in fileDownloadersList)
+            {
+                    Thread thread = new Thread(filePart.DoDownload);
+
+                    thread.Name = $"{k}";
+                    //Console.WriteLine($"Adding thread: {thread.Name} to the list");
+                    Thread.Sleep(200);
+                    threadList.Add(thread);
+                    //Console.WriteLine($"Starting thread {thread.Name}");
+                    thread.Start();
+                    manualEvent.WaitOne();
+                //thread.Join();
+                //після запуску першого потоку тут має бути вейтер який чекає поки пройде реквест із сервера в методі DoDOwnload
+                //Console.WriteLine("ok");
+                    k++;   
+            }
+
+            //foreach (var thread in threadList)
+            //{
+            //    thread.Join();
+            //}
+
+        }
 
         //public void Download(string url, string filename)
         //{
@@ -113,45 +154,6 @@ namespace Downloader
         //    }
 
         //}
-
-        public void DownloadFileInThread(string fileUrl)
-        {
-            List<FileDownloader> fileDownloadersList = new List<FileDownloader>();
-            HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(fileUrl);
-            webRequest.Method = "HEAD";
-            HttpWebResponse webResponse = (HttpWebResponse)webRequest.GetResponse();
-            int responseLength = int.Parse(webResponse.Headers.Get("Content-Length"));
-            using (FileStream stream = File.Create(MyFilePath))
-            {
-                stream.SetLength(responseLength);
-            }
-            
-
-            for (int i = 0; i < responseLength; i += (Chunk))
-            {
-                fileDownloadersList.Add(new FileDownloader(fileUrl, i, (i + (Chunk)), MyFilePath));
-            }
-
-            List<Thread> threadList = new List<Thread>();
-            foreach (var filePart in fileDownloadersList)
-            {
-                mrs.Reset();
-                Thread thread = new Thread(filePart.DoDownload);
-                //Thread.Sleep(40);
-                threadList.Add(thread);
-                thread.Start();
-                mrs.WaitOne();
-                Console.WriteLine("ok");
-                
-            }
-
-            foreach (var thread in threadList)
-            {
-                //thread.Join();
-            }
-
-        }
-
 
     }
 }
