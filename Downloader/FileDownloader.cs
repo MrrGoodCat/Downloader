@@ -72,18 +72,20 @@ namespace Downloader
             Downloader.manualEvent.Set();
 
             int totalBytes = 0;
-            byte[] buffer = new byte[1024];
-            int x = responseStream.Read(buffer, 0, 1024);
+            byte[] buffer = new byte[16384];
+            int x = responseStream.Read(buffer, 0, 16384);
 
-            while (x > 0)
-            {
-                lock (lockObject)
-                {
-                    writeFile(buffer, (int)(totalBytes + start), x);
-                    totalBytes += x;
-                    x = responseStream.Read(buffer, 0, 1024);
-                }
-            }
+            //while (x > 0)
+            //{
+            //    Console.BackgroundColor = ConsoleColor.DarkMagenta;
+            //    Console.WriteLine($"Buffer of Thread #{Thread.CurrentThread.Name}");
+            //    lock (lockObject)
+            //    {
+            //        writeFile(buffer, (int)(totalBytes + start), x);
+            //        totalBytes += x;
+            //        x = responseStream.Read(buffer, 0, 16384);
+            //    }
+            //}
             Console.BackgroundColor = ConsoleColor.DarkGreen;
             Console.WriteLine($"Done {Thread.CurrentThread.Name}");
             Console.BackgroundColor = ConsoleColor.Black;
@@ -92,12 +94,12 @@ namespace Downloader
 
         void writeFile(byte[] buffer, int start, int count)
         {
-            //using ()
+            //using (fileStream = new FileStream(PathTemp, FileMode.OpenOrCreate, FileAccess.Write))
             //{
-            fileStream = new FileStream(PathTemp, FileMode.Append, FileAccess.Write );
-                fileStream.Seek(start, SeekOrigin.Begin);
-                fileStream.Write(buffer, 0, count);
-                return;
+                
+            //    fileStream.Seek(start, SeekOrigin.Begin);
+            //    fileStream.Write(buffer, 0, count);
+            //    return;
             //}
         }
     }

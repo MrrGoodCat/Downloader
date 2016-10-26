@@ -13,7 +13,7 @@ namespace Downloader
     public class Downloader
     {
         object lockObject = new object();
-        int Chunk = 363840;
+        int Chunk = 32768;
         static string MyFilePath = "Downloadtest.jpg";
         public static ManualResetEvent manualEvent = new ManualResetEvent(false);
 
@@ -43,7 +43,7 @@ namespace Downloader
 
                     thread.Name = $"{k}";
                     //Console.WriteLine($"Adding thread: {thread.Name} to the list");
-                    Thread.Sleep(200);
+                    //Thread.Sleep(200);
                     threadList.Add(thread);
                     //Console.WriteLine($"Starting thread {thread.Name}");
                     thread.Start();
